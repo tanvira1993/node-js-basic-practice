@@ -126,40 +126,54 @@ exports.deleteUserById = (req, res, next) => {
     });
 };
 
+//  hashPass = (pass) =>{
+//    console.log('pass', pass)
+//   bcrypt.hash(pass, 10, (err, hash) => {
+//     if (err) {
+//       console.log('no work')
+//       res.json({
+//         messaage: "Hash Failed",
+//         error: err
+//       });
+//     } else {
+//       console.log('hash',  hash)
+//       return hash;
+//     }
+//   })
 
-   hashPass = (pass) =>{
-     console.log('pass', pass)
-    bcrypt.hash(pass, 10, (err, hash) => {
-      if (err) {
-        console.log('no work')
-        res.json({
-          messaage: "Hash Failed",
-          error: err
+// }
+
+generatePassword = pass => {
+  console.log("fff", bcrypt.hash(pass, 10));
+  return bcrypt.hash(pass, 10);
+};
+
+exports.editUserById = (req, res, next) => {
+  const id = req.params.id;
+
+  generatePassword(req.body.password)
+    .then(hashResult => {
+      const updatedInfo = {
+        password: hashResult
+      };
+
+      console.log("data=>", hashResult);
+
+      User.findByIdAndUpdate(id, { $set: updatedInfo })
+        .then(result => {
+          res.status(200).json({
+            message: "User Updated !",
+            result
+          });
+        })
+        .catch(err => {
+          res.json({
+            messaage: "Error Occured!"
+          });
         });
-      } else {
-        console.log('hash',  hash)
-        return hash;
-      }
-    });
-
-  }
-  
-  exports.editUserById = (req, res, next) => {
-    const id = req.params.id;
-  
-    const updatedInfo = {
-      password: hashPass(req.body.password)
-    }
-  
-
-  User.findByIdAndUpdate(id, { $set: updatedInfo })
-    .then(result => {
-      res.status(200).json({
-        message: "User Updated !",
-        result
-      });
     })
-    .catch(err => {
+    .catch(e => {
+      console.log("error", e);
       res.json({
         messaage: "Error Occured!"
       });
